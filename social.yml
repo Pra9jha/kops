@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-mine
+  labels:
+    app: social-mine
+spec:
+  replicas: 50
+  selector:
+    matchLabels:
+      app: social-mine
+  template:
+    metadata:
+      labels:
+        app: social-mine
+    spec:
+      containers:
+      - name: social-mine
+        image: <ecr-image>
+        ports:
+        - containerPort: 80
+        volumeMounts:
+          - name: local
+            mountPath: /opt/apps/social-mine/public/
+      volumes:
+      - name: local
+        hostPath:
+          path: /home/ubuntu/uploads
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-mine-service
+#annotations:
+#    service.beta.kubernetes.io/do-loadbalancer-name: "testloadbalacer-cbd"
+#  annotations:
+#    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+spec:
+  selector:
+    app: social-mine
+  #type: LoadBalancer
+  type: NodePort
+  #type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30000
+  #type: ExternalName
+  #externalName: testsocial.kopscluster.qa
